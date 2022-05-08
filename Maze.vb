@@ -15,6 +15,8 @@
         Reset()
 
         Dim Firstcell As Cell = RandomCellFrom(Me.Grid)
+
+        SetIntoGrid(Firstcell)
         Me.Maze.Add(Firstcell)
         Me.Frontier.AddRange(NonMazeNeighbors(Firstcell))
 
@@ -58,7 +60,7 @@
             Cell2.SetCarving(2)
             Return
         End If
-        Throw New Exception("Cells Unable to carve together")
+        Throw New Exception("Cells are the same and are unable to carve together")
     End Sub
     Private Function NonMazeNeighbors(Cell As Cell) As List(Of Cell)
         Dim R As New List(Of Cell)
@@ -72,7 +74,7 @@
                         ' Outside Bounds
                     Else
 
-                        If Me.Maze.Contains(New Cell(Cell.GetX + i, Cell.GetY + i)) = False Then
+                        If ListContainsCell(Me.Maze, New Cell(Cell.GetX + i, Cell.GetY + i)) = False Then
                             R.Add(New Cell(Cell.GetX + j, Cell.GetY + i))
                         End If
 
@@ -95,13 +97,20 @@
         If IsMaze = False Then
             Do
                 R = CellList(Rnd() * (CellList.Count - 1))
-            Loop Until Me.Maze.Contains(R) = False
+            Loop Until ListContainsCell(Me.Maze, R) = False 'Check against maze
             Return R
         Else
             Return CellList(Rnd() * (CellList.Count - 1))
         End If
     End Function
     '==========================================
+    Private Function ListContainsCell(List As List(Of Cell), Cell As Cell) As Boolean
+        For Each C As Cell In List
+            If C.GetX = Cell.GetX And C.GetY = Cell.GetY Then Return True
+
+        Next
+        Return False
+    End Function
     Private Sub CreateGrid(width As Integer, height As Integer)
         Me.Grid = New Cell(height, width) {}
         For i = 0 To height
