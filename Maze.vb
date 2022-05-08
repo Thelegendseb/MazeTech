@@ -24,17 +24,17 @@
 
         Do
 
-            CurrentCell = RandomCellFrom(Me.Frontier, False) 'ISNT MAZE
+            CurrentCell = RandomCellFrom(Me.Frontier) 'ISNT MAZE
 
-            Carve(CurrentCell, RandomCellFrom(Me.Maze, True)) 'IS MAZE
+            Carve(CurrentCell, RandomMazeNeighbor(CurrentCell)) 'IS MAZE
 
             SetIntoGrid(CurrentCell)
 
-            Frontier.Remove(CurrentCell)
-            Maze.Add(CurrentCell)
-            Frontier.AddRange(NonMazeNeighbors(CurrentCell))
+            Me.Frontier.Remove(CurrentCell)
+            Me.Maze.Add(CurrentCell)
+            Me.Frontier.AddRange(NonMazeNeighbors(CurrentCell))
 
-        Loop Until Frontier.Count = 0
+        Loop Until Me.Frontier.Count = 0
 
     End Sub
     '==========================================
@@ -85,23 +85,40 @@
         Return R
 
     End Function
+    Private Function RandomMazeNeighbor(Cell As Cell) As Cell
+        Dim R As New List(Of Cell)
+
+        For i = -1 To 1
+            For j = -1 To 1
+                If (i = 0 Or j = 0) And i <> j Then 'vertical, horizontal, non-central
+
+                    If (Cell.GetY + i < 0) Or (Cell.GetY + i > Me.Height) Or
+                     (Cell.GetX + j < 0) Or (Cell.GetX + j > Me.Width) Then
+                        ' Outside Bounds
+                    Else
+
+                        If ListContainsCell(Me.Maze, New Cell(Cell.GetX + i, Cell.GetY + i)) = True Then
+                            R.Add(New Cell(Cell.GetX + j, Cell.GetY + i))
+                        End If
+
+                    End If
+                End If
+            Next
+        Next
+        Randomize()
+        Dim Index As Integer = Int(Rnd() * (R.Count - 1))
+        Return R(Index)
+    End Function
     Private Function RandomCellFrom(Grid(,) As Cell) As Cell
         Randomize()
         Dim randomy As Integer = Int(Rnd() * (Grid.GetLength(0) - 1))
         Dim randomx As Integer = Int(Rnd() * (Grid.GetLength(1) - 1))
         Return Grid(randomy, randomx)
     End Function
-    Private Function RandomCellFrom(CellList As List(Of Cell), IsMaze As Boolean) As Cell
+    Private Function RandomCellFrom(CellList As List(Of Cell)) As Cell
         Dim R As Cell
         Randomize()
-        If IsMaze = False Then
-            Do
-                R = CellList(Rnd() * (CellList.Count - 1))
-            Loop Until ListContainsCell(Me.Maze, R) = False 'Check against maze
-            Return R
-        Else
-            Return CellList(Rnd() * (CellList.Count - 1))
-        End If
+        Return CellList(Int(Rnd() * (CellList.Count - 1)))
     End Function
     '==========================================
     Private Function ListContainsCell(List As List(Of Cell), Cell As Cell) As Boolean
