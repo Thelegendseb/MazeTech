@@ -3,8 +3,7 @@
     Protected Grid As Cell(,)
     Protected Maze As New List(Of Cell)
     Protected Frontier As New List(Of Cell)
-    Protected Shared Width, Height As Integer
-
+    Protected Width, Height As Integer
 
     Sub New()
         Me.Width = 9
@@ -15,8 +14,6 @@
         Reset()
 
         Dim Firstcell As Cell = RandomCellFrom(Me.Grid)
-
-        SetIntoGrid(Firstcell)
         Me.Maze.Add(Firstcell)
         Me.Frontier.AddRange(NonMazeNeighbors(Firstcell))
 
@@ -28,8 +25,6 @@
 
             Carve(CurrentCell, RandomMazeNeighbor(CurrentCell)) 'IS MAZE
 
-            SetIntoGrid(CurrentCell)
-
             Me.Frontier.Remove(CurrentCell)
             Me.Maze.Add(CurrentCell)
             Me.Frontier.AddRange(NonMazeNeighbors(CurrentCell))
@@ -38,9 +33,6 @@
 
     End Sub
     '==========================================
-    Private Sub SetIntoGrid(Cell As Cell)
-        Me.Grid(Cell.GetY, Cell.GetX).SetCarvings(Cell.GetCarvings)
-    End Sub
     Private Sub Carve(ByRef Cell1 As Cell, ByRef Cell2 As Cell)
         If Cell1.GetX > Cell2.GetX Then
             Cell1.SetCarving(1)
@@ -60,7 +52,7 @@
             Cell2.SetCarving(2)
             Return
         End If
-        Throw New Exception("Cells are the same and are unable to carve together")
+        Throw New Exception("Param ""Cell1"" and ""Cell2"" have equal coordinates.")
     End Sub
     Private Function NonMazeNeighbors(Cell As Cell) As List(Of Cell)
         Dim R As New List(Of Cell)
@@ -74,8 +66,8 @@
                         ' Outside Bounds
                     Else
 
-                        If ListContainsCell(Me.Maze, New Cell(Cell.GetX + i, Cell.GetY + i)) = False Then
-                            R.Add(New Cell(Cell.GetX + j, Cell.GetY + i))
+                        If ListContainsCell(Me.Maze, Me.Grid(Cell.GetY + i, Cell.GetX + j)) = False Then
+                            R.Add(Me.Grid(Cell.GetY + i, Cell.GetX + j))
                         End If
 
                     End If
@@ -97,11 +89,12 @@
                         ' Outside Bounds
                     Else
 
-                        If ListContainsCell(Me.Maze, New Cell(Cell.GetX + i, Cell.GetY + i)) = True Then
-                            R.Add(New Cell(Cell.GetX + j, Cell.GetY + i))
+                        If ListContainsCell(Me.Maze, Me.Grid(Cell.GetY + i, Cell.GetX + j)) = True Then
+                            R.Add(Me.Grid(Cell.GetY + i, Cell.GetX + j))
                         End If
 
                     End If
+
                 End If
             Next
         Next
@@ -116,7 +109,6 @@
         Return Grid(randomy, randomx)
     End Function
     Private Function RandomCellFrom(CellList As List(Of Cell)) As Cell
-        Dim R As Cell
         Randomize()
         Return CellList(Int(Rnd() * (CellList.Count - 1)))
     End Function
@@ -129,25 +121,20 @@
         Return False
     End Function
     Private Sub CreateGrid(width As Integer, height As Integer)
-        Me.Grid = New Cell(height, width) {}
+        ResetGrid()
         For i = 0 To height
             For j = 0 To width
                 Me.Grid(i, j) = New Cell(j, i)
             Next
         Next
     End Sub
-    Private Sub InitialiseGrid()
-        Me.Grid = New Cell(Height, Width) {}
-    End Sub
     Private Sub Reset()
-        ResetGrid()
+        CreateGrid(Me.Width, Me.Height)
         ResetMaze()
         ResetFrontier()
     End Sub
     Private Sub ResetGrid()
-        For Each element As Cell In Me.Grid
-            element = New Cell(element.GetX, element.GetY)
-        Next
+        Me.Grid = New Cell(Height, Width) {}
     End Sub
     Private Sub ResetMaze()
         Me.Maze.Clear()
